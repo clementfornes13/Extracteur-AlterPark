@@ -87,7 +87,7 @@ class AlterParkExtractor:
                     startfile(file_path)
                 else:
                  popup('Pas de fichier sélectionné, veuillez en sélectionner un !',title='Erreur',icon=s.icon)
-
+        s.window.close()
 # This code block is checking if the current script is being run as the main program (as opposed to
 # being imported as a module into another program). If it is being run as the main program, it creates
 # an instance of the AlterParkExtractor class and calls its run() method, which starts the PySimpleGUI

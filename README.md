@@ -1,6 +1,6 @@
 <!-- LOGO PROJET -->
 <div align="center">
-  <h3 align="center">Extracteur VIN PDF</h3>
+  <h3 align="center">Extracteur AlterPark</h3>
 </div>
 
 <!-- SOMMAIRE -->
@@ -27,7 +27,7 @@
 ## A propos
 
 
-L'extracteur VIN PDF est un exécutable qui permet aux utilisateurs d'extraire directement les VIN présents sur un PDF donné
+L'extracteur AlterPark est un exécutable qui permet aux utilisateurs d'extraire directement les données présentes sur un scan PDF AlterPark
 
 <p align="right">(<a href="#readme-top">Revenir en haut</a>)</p>
 
@@ -67,12 +67,11 @@ L'extracteur VIN PDF est un exécutable qui permet aux utilisateurs d'extraire d
 ## Historique des versions
 
 - Version 1 : 
-	> Analyse du texte pour trouver le texte avant le VIN
+	> Analyse du texte pour trouver les données
 
 - Version 1.1 :
-	> Détection directe des VINs selon un pattern
-- Version 1.2 :
   > Ajout du choix de l'emplacement de destination
+
   > Ouverture automatique du fichier à la fin de l'extraction
 
 <p align="right">(<a href="#readme-top">Revenir en haut</a>)</p>

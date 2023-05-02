@@ -19,7 +19,7 @@ class AlterParkExtractor:
         special method in Python classes that is called when an instance of the class is created. In
         """
         
-        s.NUMERO_RESA_PATTERN = r"\b([A-Z0-9]{7})\b"
+        s.NUMERO_RESA_PATTERN = r"A\d{6}"
         s.APPORTEUR_PATTERN = r"\b([A-Z]+)\b"
         s.DATES_PATTERN = r"\d{2}/\d{2}/\d{4}"
         s.TOTAL_PATTERN = r"\d+,\d{2}"

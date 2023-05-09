@@ -67,7 +67,7 @@ class AlterParkExtractor:
                             if pixel_img >= 5:
                                 for x, y, w, h in coordonnees:
                                     coord_rect = img[y:y+h, x:x+w]
-                                    detection = cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 1)
+                                    #detection = cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 1)
                                     config = '--psm 3 --oem 3'
                                     text = pytesseract.image_to_string(coord_rect, config=config)
                                     print(f'Page {page_num+1}, Coordonnees : ({x}, {y}, {w}, {h}): {text}')
@@ -83,7 +83,7 @@ class AlterParkExtractor:
                                 img_rota = cv2.rotate(img, cv2.ROTATE_180)
                                 for x, y, w, h in coordonnees:
                                     coord_rect = img_rota[y:y+h, x:x+w]
-                                    detection = cv2.rectangle(img_rota, (x, y), (x+w, y+h), (0, 0, 255), 1)
+                                    #detection = cv2.rectangle(img_rota, (x, y), (x+w, y+h), (0, 0, 255), 1)
                                     config = '--psm 3 --oem 3'
                                     text = pytesseract.image_to_string(coord_rect, config=config)
                                     print(f'Page {page_num+1}, Coordonnees : ({x}, {y}, {w}, {h}): {text}')

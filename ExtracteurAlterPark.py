@@ -1,28 +1,16 @@
-#Auto -generated docs, and comment using a tool named : Mintlify Doc Writer
-
-# The PDFExtractor class extracts specific information from a PDF file and saves it to an Excel file.
-
+import PyPDF2
+from pdf2image import convert_from_path
+import cv2
+import pytesseract
+import openpyxl
 from PySimpleGUI import theme, Text, Button, Input, FileBrowse, FolderBrowse, Exit, Image, WIN_CLOSED, popup, Window
-from os import path, startfile
+from os import path, startfile, remove
 from re import findall
-from PyPDF2 import PdfReader
-from openpyxl import Workbook
 
 class AlterParkExtractor:
     def __init__(s):
         
-        """
-        The function initializes several regular expression patterns and sets the theme to 'Material1'.
-        
-        :param s: The parameter "s" is a reference to the instance of the class being created. It is
-        commonly used as a convention for the "self" parameter in Python classes. The "__init__" method is a
-        special method in Python classes that is called when an instance of the class is created. In
-        """
-        
-        s.NUMERO_RESA_PATTERN = r"A\d{6}"
-        s.APPORTEUR_PATTERN = r"\b([A-Z]+)\b"
-        s.DATES_PATTERN = r"\d{2}/\d{2}/\d{4}"
-        s.TOTAL_PATTERN = r"\d+,\d{2}"
+
         theme('Material1')
         s.IMG_PATH = path.join(path.dirname(__file__), 'images')
         s.icon = path.join(s.IMG_PATH, 'Icone.ico')
@@ -30,15 +18,6 @@ class AlterParkExtractor:
         
     def run(s):
         
-        """
-        This is a Python function that extracts information from a PDF file and saves it to an Excel
-        file, with a GUI interface for selecting the input and output files.
-        
-        :param s: The parameter "s" is likely an instance of a class or a namespace object that contains
-        various attributes and methods used in the "run" function. These attributes and methods are
-        likely used to define the layout of the GUI window, extract information from PDF files, and save
-        the extracted information to an Excel
-        """
         
         layout = [
             [Text("Fichier PDF :"), Input(), FileBrowse('Parcourir',file_types=(("Fichiers PDF", "*.pdf"),))],
@@ -53,28 +32,69 @@ class AlterParkExtractor:
             elif event == "Extraction": 
                 emplacement_pdf = values[0] 
                 if emplacement_pdf:
-                    fichier_pdf = open(emplacement_pdf, 'rb') 
-                    lire_pdf = PdfReader(fichier_pdf) 
-                    workbook = Workbook()
+                    pdf_file = open(emplacement_pdf, 'rb') 
+                    pdf_reader = PyPDF2.PdfReader(pdf_file)
+                    workbook = openpyxl.Workbook()
                     sheet = workbook.active
-                    sheet['A1'] = 'Numéro de résa'
-                    sheet['B1'] = 'Date 1'
-                    sheet['C1'] = 'Date 2'
-                    sheet['D1'] = 'Montant total'
-                    sheet['E1'] = 'Apporteur'
-                    for page_num in range(len(lire_pdf.pages)):
-                        page = lire_pdf.pages[page_num]
-                        texte = page.extract_text()
-                        print(texte)
-                        dates = findall(s.DATES_PATTERN, texte)
-                        montanttotal  = findall(s.TOTAL_PATTERN, texte)
-                        num_resa = findall(s.NUMERO_RESA_PATTERN, texte)
-                        apporteur = findall(s.APPORTEUR_PATTERN, texte)
-                        sheet['A' + str(sheet.max_row)] = num_resa[0]
-                        sheet['B' + str(sheet.max_row)] = dates[0]
-                        sheet['C' + str(sheet.max_row)] = dates[1]
-                        sheet['D' + str(sheet.max_row)] = montanttotal[0]
-                        sheet['E' + str(sheet.max_row)] = apporteur[15]
+                    sheet.title = "AlterPark"
+                    sheet['A1'] = 'Numéro de réservation'
+                    sheet['B1'] = 'Immatriculation'
+                    sheet['C1'] = 'Date 1'
+                    sheet['D1'] = 'Date 2'
+                    sheet['E1'] = 'Montant total'
+                    sheet['F1'] = 'Apporteur'
+                    for page_num in range(len(pdf_reader.pages)):
+                        page = pdf_reader.pages[page_num]
+                        image = convert_from_path('C:/Users/clement.fornes/Desktop/ScriptsPython/Gitrepository/Extracteur-AlterPark/document.pdf', first_page=page_num+1, last_page=page_num+1)[0]
+                        image.save(f'page_{page_num+1}.jpg') #Converti en jpg et save
+                        img = cv2.imread(f'page_{page_num+1}.jpg', cv2.IMREAD_GRAYSCALE) #Lis l'image
+                        remove(f'page_{page_num+1}.jpg')
+                        test_reverse = [(1310, 150, 150, 100)] #Rectangle qui permet de savoir si c'est inversé ou non
+                        coordonnees = [
+                            (225, 70, 640, 80),  # Deplacement x , Deplacement y, Longueur, Largeur (Point en haut a gauche)
+                            (1120, 290, 400, 60),
+                            (190, 1180, 200, 50),
+                            (950, 1180, 200, 50),
+                            (1280, 1800, 240, 50),
+                            (1200, 1930, 300, 50)
+                        ]
+                        for x, y, w, h in test_reverse:
+                            test = img[y:y+h, x:x+w]
+                            pixel_img = (test == 50).sum()
+                            print(f"Il y a {pixel_img} pixels d'image dans le rectangle")
+                            p=0
+                            o=0
+                            if pixel_img >= 5:
+                                for x, y, w, h in coordonnees:
+                                    coord_rect = img[y:y+h, x:x+w]
+                                    detection = cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 1)
+                                    config = '--psm 3 --oem 3'
+                                    text = pytesseract.image_to_string(coord_rect, config=config)
+                                    print(f'Page {page_num+1}, Coordonnees : ({x}, {y}, {w}, {h}): {text}')
+                                    p=p+1
+                                    column_num = p  # assuming p=3 in this case
+                                    column_letter = openpyxl.utils.get_column_letter(column_num)
+                                    sheet[column_letter + str(page_num+1)] = text
+                                    #je dois save dans la colonne +1 a chaque fois. donc faire un c+= 
+                                    #same pour le else quand l'image est tournée
+                                    #chaque valeur en dessous max_row
+                                    #voir doc pour voir comment marquer sheet[column=row= etc..]
+                            else:
+                                img_rota = cv2.rotate(img, cv2.ROTATE_180)
+                                for x, y, w, h in coordonnees:
+                                    coord_rect = img_rota[y:y+h, x:x+w]
+                                    detection = cv2.rectangle(img_rota, (x, y), (x+w, y+h), (0, 0, 255), 1)
+                                    config = '--psm 3 --oem 3'
+                                    text = pytesseract.image_to_string(coord_rect, config=config)
+                                    print(f'Page {page_num+1}, Coordonnees : ({x}, {y}, {w}, {h}): {text}')
+                                    o=o+1
+                                    column_num = o  # assuming p=3 in this case
+                                    column_letter = openpyxl.utils.get_column_letter(column_num)
+                                    sheet[column_letter + str(page_num+1)] = text
+
+                        #cv2.imwrite(f'result_page_{page_num+1}.jpg', detection)
+                        #cv2.waitKey(0)
+                        #cv2.destroyAllWindows()
                     file_name = "Extraction infos.xlsx".format(1)
                     file_path = path.join(values['Destination'],file_name)
                     i = 1
@@ -88,10 +108,6 @@ class AlterParkExtractor:
                 else:
                  popup('Pas de fichier sélectionné, veuillez en sélectionner un !',title='Erreur',icon=s.icon)
         s.window.close()
-# This code block is checking if the current script is being run as the main program (as opposed to
-# being imported as a module into another program). If it is being run as the main program, it creates
-# an instance of the AlterParkExtractor class and calls its run() method, which starts the PySimpleGUI
-# window and runs the AlterPark extraction program.
 
 if __name__ == '__main__':
     extracteur = AlterParkExtractor()

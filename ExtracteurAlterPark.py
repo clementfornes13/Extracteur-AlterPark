@@ -7,10 +7,10 @@ from PySimpleGUI import theme, Text, Button, Input, FileBrowse, FolderBrowse, Ex
 from os import path, startfile, remove, add_dll_directory, path
 import re
 import sys
-
 class AlterParkExtractor:
     def __init__(self):
         theme('Material1')
+        # Patternes
         self.DATE_PATTERN = r"\d{2}/\d{2}/\d{4}"
         self.IMMAT_PATTERN = r"[A-Z]{2}-[0-9]{3}-[A-Z]{2} | [A-Z]{2}[0-9]{3}[A-Z]{2}"
         self.LIST_APPORTEUR = ['parkcloud', 'travelcar', 'ZENPARK', 'parkos', 'travelercar']

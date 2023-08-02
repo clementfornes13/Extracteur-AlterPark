@@ -1,6 +1,6 @@
 <!-- LOGO PROJET -->
 <div align="center">
-  <h3 align="center">Extracteur AlterPark</h3>
+  <h3 align="center">Extracteur AlterPark (mise à jour prochainement</h3>
 </div>
 
 <!-- SOMMAIRE -->

@@ -63,7 +63,7 @@ class PDFFinder:
         self.progress_bar.grid(row=4, column=0, columnspan=3, padx=5, pady=5, sticky="nsew")
         self.label_progress.grid(row=5, column=1, padx=5, pady=5, sticky="nsew")
         self.label_time_remaining.grid(row=6, column=1, padx=5, pady=5, sticky="nsew")
-        
+
     def browse_pdf(self):
         if file_path:= filedialog.askopenfilename(
             filetypes=[("Fichiers PDF",
@@ -83,7 +83,7 @@ class PDFFinder:
             messagebox.showerror("Erreur", "Veuillez sélectionner un fichier PDF.")
             return False
         return True
-    
+
     def validate_destination(self, destination):
         if destination == "":
             messagebox.showerror("Erreur", "Veuillez sélectionner un dossier de destination.")
@@ -92,7 +92,7 @@ class PDFFinder:
             messagebox.showerror("Erreur", "Chemin du dossier de destination invalide.")
             return False
         return True
-        
+
     def start_extraction(self):
         pdf_file_path = self.pdf_file_path.get()
         destination = self.destination.get()
@@ -100,7 +100,7 @@ class PDFFinder:
         if self.validate_pdf_file_path(pdf_file_path) and self.validate_destination(destination):
             thread = Thread(target=self.process_pdf, args=(pdf_file_path, destination))
             thread.start()
-    
+
     def update_progress(self, page_num, total_pages):
         # Mettre à jour la barre de progression et le pourcentage de progression
         progress_percent = (page_num + 1) / total_pages * 100
@@ -110,7 +110,7 @@ class PDFFinder:
         time_remaining = (perf_counter() - self.start_time) / (page_num + 1) * (total_pages - page_num - 1)
         self.label_time_remaining.config(text=f"Temps restant : {time_remaining:.0f} secondes")
         self.root.update()
-        
+
     def show_success_message(self, pages_with_no_patterns, excel_filename):
         message = (
             f"Extraction terminée avec succès!\n\n"
@@ -118,7 +118,7 @@ class PDFFinder:
             f"Classeur Excel sauvegardé dans {excel_filename}"
         )
         messagebox.showinfo("Succès", message)
-    
+
     def initialize_excel(self):
         workbook = Workbook()
         sheet = workbook.active
@@ -136,7 +136,7 @@ class PDFFinder:
 
         sheet.append(column_headers)
         return sheet, workbook
-    
+
     def initialize_values(self):
         search_values = ["parkcloud", "travelcar", "zenpark", "parkos", "travelercar"]
         dpi_factor = 400
@@ -151,7 +151,7 @@ class PDFFinder:
         return (search_values, dpi_factor, total_pages_found, reservation_number_count,
                 date_depot_count, date_restitution_count, total_price_count,
                 plate_number_count, apporteur_count, pages_with_patterns)
-    
+
     def process_pdf(self, pdf_file_path, destination):
         doc = fitz.open(pdf_file_path)
         total_pages = len(doc)
@@ -176,7 +176,7 @@ class PDFFinder:
         pages_with_no_patterns = self.finish_extraction(doc, total_pages, pages_with_patterns)
         excel_filename = self.excel_save_file(destination, workbook)
         self.show_success_message(pages_with_no_patterns, excel_filename)
-        
+
     def finish_extraction(self, doc, total_pages, pages_with_patterns):
         doc.close()
         pages_with_no_patterns = [
@@ -187,7 +187,7 @@ class PDFFinder:
         self.pdf_file_path.set("")
         self.destination.set("")
         return pages_with_no_patterns
-    
+
     def launch_ocr(self, doc, page_num, dpi_factor):
         page = doc.load_page(page_num)
         pix = page.get_pixmap(matrix=fitz.Matrix(dpi_factor / 72, dpi_factor / 72))
@@ -196,7 +196,7 @@ class PDFFinder:
         ocr_text = ocr_text.replace('I', '1').replace('O', '0').replace('U', 'V')
         ocr_text = ocr_text.replace('parkcl0vd', 'parkcloud').replace('park0s', 'parkos').replace('PARKCL0VD','PARKCLOUD').replace('PARK0S','PARKOS')
         return ocr_text
-    
+
     def process_ocr(self, ocr_text, search_values):
         if 'ASE' not in ocr_text:
             reservation_number_matches = findall(self.reservation_number_pattern, ocr_text)
@@ -232,7 +232,7 @@ class PDFFinder:
         ]
         plate_number = self.license_plate_check(plate_number_matches, ocr_text)
         return reservation_number, date_depot, date_restitution, max_total_price, plate_number, found_values
-    
+
     def license_plate_check(self, plate_number_matches, ocr_text):
         patterns = [
             self.license_plate_pattern1,
@@ -245,9 +245,8 @@ class PDFFinder:
             plate_number_matches = findall(pattern, ocr_text, IGNORECASE)
             if len(plate_number_matches) >= 1:
                 return plate_number_matches[0]
-        
         return None
-    
+
     def increase_count(self, reservation_number, date_depot, date_restitution,
                        max_total_price, plate_number, found_values,
                        reservation_number_count, date_depot_count, date_restitution_count,
@@ -278,7 +277,7 @@ class PDFFinder:
             plate_number_count,
             apporteur_count
         )
-    
+
     def excel_add(self, sheet, page_num, reservation_number, date_depot,
                   date_restitution, max_total_price, plate_number,
                   found_values, pages_with_patterns, total_pages_found):
@@ -310,12 +309,12 @@ class PDFFinder:
         with open(f"{destination}/page_{page_num+1}_recognized.txt", "w", encoding="utf-8") as f:
             f.write(recognized_text)
     '''
-            
+    
     def excel_save_file(self, destination, workbook):
         excel_filename = f"{destination}/extracted_data_{datetime.now().strftime('%d-%m-%Y_%H-%M-%S')}.xlsx"
         workbook.save(excel_filename)
         return excel_filename
-    
+
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))

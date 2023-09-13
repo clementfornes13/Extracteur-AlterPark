@@ -309,7 +309,7 @@ class PDFFinder:
         with open(f"{destination}/page_{page_num+1}_recognized.txt", "w", encoding="utf-8") as f:
             f.write(recognized_text)
     '''
-    
+
     def excel_save_file(self, destination, workbook):
         excel_filename = f"{destination}/extracted_data_{datetime.now().strftime('%d-%m-%Y_%H-%M-%S')}.xlsx"
         workbook.save(excel_filename)

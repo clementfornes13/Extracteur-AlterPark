@@ -96,7 +96,7 @@ class PDFFinder:
     def start_extraction(self):
         pdf_file_path = self.pdf_file_path.get()
         destination = self.destination.get()
-        
+
         if self.validate_pdf_file_path(pdf_file_path) and self.validate_destination(destination):
             thread = Thread(target=self.process_pdf, args=(pdf_file_path, destination))
             thread.start()

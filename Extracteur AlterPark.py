@@ -296,7 +296,6 @@ class PDFFinder:
         ]
         sheet.append(row_values)
 
-    '''
     def log_page(self, destination, ocr_text, page_num, reservation_number, date_depot, date_restitution, max_total_price, plate_number, found_values):
         recognized_text = "\n".join([f"Reservation: {reservation_number}", 
                                     f"Date depot: {date_depot}", 
@@ -308,7 +307,6 @@ class PDFFinder:
             f.write(ocr_text)
         with open(f"{destination}/page_{page_num+1}_recognized.txt", "w", encoding="utf-8") as f:
             f.write(recognized_text)
-    '''
 
     def excel_save_file(self, destination, workbook):
         excel_filename = f"{destination}/extracted_data_{datetime.now().strftime('%d-%m-%Y_%H-%M-%S')}.xlsx"

@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox, Label, filedialog, messagebox, PhotoImage
+from tkinter import filedialog, messagebox, Label, messagebox, PhotoImage
 from os import path
 from threading import Thread
 import fitz
@@ -15,12 +15,11 @@ import os
 
 class PDFFinder:
     def __init__(self, root):
-        
         self.root = root
         self.root.title("Extraction Scans AlterPark")
         self.root.geometry("300x350")
         self.root.resizable(False, False)
-        self.IMG_PATH = path.join(path.dirname(__file__), 'Images') 
+        self.IMG_PATH = path.join(path.dirname(__file__), 'Images')
         self.root.iconbitmap(path.join(self.IMG_PATH, 'logo.ico').replace('\\', '/'))
 
         self.reservation_number_pattern = r"(?<![0-9])0*(\d{5})"
@@ -68,7 +67,7 @@ class PDFFinder:
         
     def browse_pdf(self):
         if file_path:= filedialog.askopenfilename(
-            filetypes=[("Fichiers PDF", 
+            filetypes=[("Fichiers PDF",
                         "*.pdf")]
         ):
             self.pdf_file_path.set(file_path)
@@ -150,21 +149,31 @@ class PDFFinder:
         plate_number_count = 0
         apporteur_count = 0
         pages_with_patterns = []
-        return search_values, dpi_factor, total_pages_found, reservation_number_count, date_depot_count, date_restitution_count, total_price_count, plate_number_count, apporteur_count, pages_with_patterns
+        return (search_values, dpi_factor, total_pages_found, reservation_number_count,
+                date_depot_count, date_restitution_count, total_price_count,
+                plate_number_count, apporteur_count, pages_with_patterns)
     
     def process_pdf(self, pdf_file_path, destination):
         doc = fitz.open(pdf_file_path)
         total_pages = len(doc)
-        search_values, dpi_factor, total_pages_found, reservation_number_count, date_depot_count, date_restitution_count, total_price_count, plate_number_count, apporteur_count, pages_with_patterns = self.initialize_values()
+        (search_values, dpi_factor, total_pages_found, reservation_number_count,
+         date_depot_count, date_restitution_count, total_price_count,
+         plate_number_count, apporteur_count, pages_with_patterns) = self.initialize_values()
         sheet, workbook = self.initialize_excel()
         self.start_time = perf_counter()
         for page_num in range(total_pages):
             self.update_progress(page_num, total_pages)
             ocr_text = self.launch_ocr(doc, page_num, dpi_factor)
             reservation_number, date_depot, date_restitution, max_total_price, plate_number, found_values = self.process_ocr(ocr_text, search_values)
-            self.increase_count(reservation_number, date_depot, date_restitution, max_total_price, plate_number, found_values, reservation_number_count, date_depot_count, date_restitution_count, total_price_count, plate_number_count, apporteur_count)
+            self.increase_count(reservation_number, date_depot, date_restitution,
+                                max_total_price, plate_number, found_values,
+                                reservation_number_count, date_depot_count,
+                                date_restitution_count, total_price_count,
+                                plate_number_count, apporteur_count)
             #self.log_page(destination, ocr_text, page_num, reservation_number, date_depot, date_restitution, max_total_price, plate_number, found_values)
-            self.excel_add(sheet, page_num, reservation_number, date_depot, date_restitution, max_total_price, plate_number, found_values, pages_with_patterns, total_pages_found)
+            self.excel_add(sheet, page_num, reservation_number, date_depot,
+                           date_restitution, max_total_price, plate_number,
+                           found_values, pages_with_patterns, total_pages_found)
         pages_with_no_patterns = self.finish_extraction(doc, total_pages, pages_with_patterns)
         excel_filename = self.excel_save_file(destination, workbook)
         self.show_success_message(pages_with_no_patterns, excel_filename)
@@ -240,7 +249,10 @@ class PDFFinder:
         
         return None
     
-    def increase_count(self, reservation_number, date_depot, date_restitution, max_total_price, plate_number, found_values, reservation_number_count, date_depot_count, date_restitution_count, total_price_count, plate_number_count, apporteur_count):
+    def increase_count(self, reservation_number, date_depot, date_restitution,
+                       max_total_price, plate_number, found_values,
+                       reservation_number_count, date_depot_count, date_restitution_count,
+                       total_price_count, plate_number_count, apporteur_count):
         if reservation_number != "":
             reservation_number_count += 1
         if date_depot != "":
@@ -253,9 +265,24 @@ class PDFFinder:
             plate_number_count += 1
         if found_values != "":
             apporteur_count += 1
-        return reservation_number, date_depot, date_restitution, max_total_price, plate_number, found_values, reservation_number_count, date_depot_count, date_restitution_count, total_price_count, plate_number_count, apporteur_count
+        return (
+            reservation_number,
+            date_depot,
+            date_restitution,
+            max_total_price,
+            plate_number,
+            found_values,
+            reservation_number_count,
+            date_depot_count,
+            date_restitution_count,
+            total_price_count,
+            plate_number_count,
+            apporteur_count
+        )
     
-    def excel_add(self, sheet, page_num, reservation_number, date_depot, date_restitution, max_total_price, plate_number, found_values, pages_with_patterns, total_pages_found):
+    def excel_add(self, sheet, page_num, reservation_number, date_depot,
+                  date_restitution, max_total_price, plate_number,
+                  found_values, pages_with_patterns, total_pages_found):
         if reservation_number and date_depot and date_restitution and max_total_price and plate_number and found_values != "":
             total_pages_found += 1
             pages_with_patterns.append(page_num + 1)
@@ -294,6 +321,8 @@ def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
+
+
 if __name__ == "__main__":
     root = tk.Tk()
     app = PDFFinder(root)
